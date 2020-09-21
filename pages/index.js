@@ -1,65 +1,130 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import Head from 'next/head';
+import styles from '../styles/Index.module.css';
+import { useState } from 'react';
+import Axios from 'axios';
 
 export default function Home() {
+  const [send, setSend] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [disabled, setDisabled] = useState(false);
+
+  const [name, setName] = useState('');
+  const [to, setTo] = useState('');
+  const [subject, setSubject] = useState('');
+  const [content, setContent] = useState('');
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!name || !to || !subject || !content) {
+      return;
+    }
+    setDisabled(true);
+    setSend(true);
+
+    try {
+      var timeout = setTimeout(async () => {
+        setIsLoading(true);
+
+        await Axios.post('/api/mail', {
+          name,
+          to,
+          subject,
+          content,
+        });
+        setIsLoading(false);
+        setSent(true);
+        setSend(false);
+        setDisabled(false);
+        setTimeout(() => reset(), 5000);
+      }, 2800);
+    } catch (error) {
+      clearTimeout(timeout);
+    }
+  }
+
+  function reset() {
+    setDisabled(false);
+    setIsLoading(false);
+    setSent(false);
+    setSend(false);
+  }
+
   return (
-    <div className={styles.container}>
+    <>
       <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
+        <title>Email sender</title>
       </Head>
+      <div className={styles.container}>
+        <main>
+          <div className={styles.logo}>
+            <img src="./assets/mail.png" alt="mail-logo" />
+          </div>
+          <form id="form" onSubmit={handleSubmit}>
+            <h3>Email sender</h3>
+            <h6>Send a email to your friends!</h6>
+            <input
+              type="text"
+              id="name"
+              placeholder="Your name"
+              onChange={(e) => setName(e.target.value)}
+            />
+            <input
+              type="text"
+              id="recipient"
+              placeholder="Email to"
+              onChange={(e) => setTo(e.target.value)}
+            />
+            <input
+              type="text"
+              id="subject"
+              placeholder="Subject"
+              onChange={(e) => setSubject(e.target.value)}
+            />
+            <textarea
+              type="text"
+              id="content"
+              placeholder="Content"
+              onChange={(e) => setContent(e.target.value)}
+            />
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+            <button
+              type="submit"
+              id="send"
+              disabled={disabled}
+              className={sent ? styles.sent : null}
+              onMouseEnter={sent ? reset : () => {}}
+            >
+              <span style={send || isLoading ? { display: 'none' } : {}}>
+                {sent ? 'Email sent!' : 'Send'}
+              </span>
+              {(() => {
+                if (!sent) {
+                  if (isLoading) {
+                    return (
+                      <img
+                        src="./assets/loader.svg"
+                        alt="loader"
+                        style={{ width: '22px', height: '22px', margin: 0 }}
+                      />
+                    );
+                  } else {
+                    return (
+                      <img
+                        style={isLoading ? { display: 'none' } : {}}
+                        className={send ? styles.send : null}
+                        src="./assets/send.svg"
+                        alt="send"
+                      />
+                    );
+                  }
+                }
+              })()}
+              {sent && <img src="./assets/sent.svg" alt="sent" />}
+            </button>
+          </form>
+        </main>
+      </div>
+    </>
+  );
 }
