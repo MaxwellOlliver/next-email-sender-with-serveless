@@ -2,6 +2,8 @@
 import nodemailer from 'nodemailer';
 import auth from '../../config/mail';
 
+const transporter = {};
+
 export default async (req, res) => {
   const { name, to, subject, content } = req.body;
 
@@ -9,7 +11,7 @@ export default async (req, res) => {
     return res.status(400).json({ error: 'Validation fails.' });
   }
 
-  const transporter = nodemailer.createTransport({
+  transporter = nodemailer.createTransport({
     service: 'gmail',
     port: auth.MAIL_PORT,
     auth: {
