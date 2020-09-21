@@ -1,6 +1,8 @@
-import Head from 'next/head';
-import styles from '../styles/Index.module.css';
 import { useState } from 'react';
+import Head from 'next/head';
+import { FiSend, FiCheck } from 'react-icons/fi';
+
+import styles from '../styles/Index.module.css';
 import Axios from 'axios';
 
 export default function Home() {
@@ -14,28 +16,38 @@ export default function Home() {
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
 
+  const [errorMsg, setErrorMsg] = useState('');
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!name || !to || !subject || !content) {
+      setErrorMsg('Please fill in all fields.');
       return;
     }
     setDisabled(true);
     setSend(true);
 
     try {
+      setErrorMsg('');
       var timeout = setTimeout(async () => {
         setIsLoading(true);
 
-        await Axios.post('/api/mail', {
-          name,
-          to,
-          subject,
-          content,
-        });
-        setIsLoading(false);
-        setSent(true);
-        setSend(false);
-        setDisabled(false);
+        try {
+          await Axios.post('/api/mail', {
+            name,
+            to,
+            subject,
+            content,
+          });
+          setIsLoading(false);
+          setSent(true);
+          setSend(false);
+          setDisabled(false);
+        } catch (error) {
+          reset();
+          setErrorMsg('Error sending email.');
+        }
+
         setTimeout(() => reset(), 5000);
       }, 2800);
     } catch (error) {
@@ -110,18 +122,19 @@ export default function Home() {
                     );
                   } else {
                     return (
-                      <img
-                        style={isLoading ? { display: 'none' } : {}}
+                      <FiSend
                         className={send ? styles.send : null}
-                        src="./assets/send.svg"
-                        alt="send"
+                        size={18}
+                        color="#fff"
                       />
                     );
                   }
                 }
               })()}
-              {sent && <img src="./assets/sent.svg" alt="sent" />}
+              {sent && <FiCheck size={18} color="#fff" />}
             </button>
+
+            <span className={styles.error}>{errorMsg}</span>
           </form>
         </main>
       </div>

@@ -2,7 +2,7 @@
 import nodemailer from 'nodemailer';
 import auth from '../../config/mail';
 
-const transporter = {};
+let transporter;
 
 export default async (req, res) => {
   const { name, to, subject, content } = req.body;

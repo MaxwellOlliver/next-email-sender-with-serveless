@@ -132,9 +132,7 @@ main .logo {
   transition: opacity 0.3s;
 }
 
-.container form button img {
-  width: 18px;
-  height: 18px;
+.container form button svg {
   margin-left: 5px;
 
   transition: all 0.3s;
@@ -146,6 +144,13 @@ main .logo {
 
 .sent {
   background-color: #7ecc7e !important;
+}
+
+.error {
+  height: 16px;
+  font-size: 14px;
+  margin-top: 10px;
+  color: #f14646;
 }
 
 @keyframes fly {
